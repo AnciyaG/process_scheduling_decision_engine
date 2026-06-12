@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Process Scheduling Decision Engine - AI Recommendation & Simulation</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Background Particles Overlay -->
+    <div class="particles-bg"></div>
+
+    <!-- Main Container -->
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fa-solid fa-microchip neon-text-purple"></i>
+                <span class="logo-text">Sched<span class="gradient-text">Engine</span></span>
+            </div>
+            <h1 class="main-title">Process Scheduling Decision Engine</h1>
+            <p class="subtitle">An AI-Powered Scheduling Recommendation and Simulation System</p>
+        </header>
+
+        <!-- Main Content Grid -->
+        <main class="dashboard-grid">
+            
+            <!-- Section 1: Workload Input & Configuration (Left/Full Width) -->
+            <section class="glass-card input-card">
+                <div class="card-header">
+                    <i class="fa-solid fa-keyboard neon-text-blue"></i>
+                    <h2>1. Workload Description</h2>
+                </div>
+                <p class="card-desc">Describe your workload in natural language. The engine will extract characteristics, generate processes, and simulate the execution queue.</p>
+                
+                <form id="workload-form" class="workload-form">
+                    <textarea 
+                        id="workload-input" 
+                        placeholder="e.g., A real-time chat application with many short requests and low latency requirements..."
+                        required
+                    ></textarea>
+                    
+                    <div class="form-actions">
+                        <div class="quick-examples">
+                            <span class="example-label">Try these:</span>
+                            <button type="button" class="btn-example" data-text="A real-time chat application with many short requests.">
+                                <i class="fa-solid fa-comments"></i> Chat App (Real-time)
+                            </button>
+                            <button type="button" class="btn-example" data-text="Batch video rendering jobs running overnight.">
+                                <i class="fa-solid fa-clapperboard"></i> Video Render (Batch)
+                            </button>
+                            <button type="button" class="btn-example" data-text="Emergency hospital alert processing system.">
+                                <i class="fa-solid fa-truck-medical"></i> Hospital Alerts (Critical)
+                            </button>
+                        </div>
+                        <button type="submit" id="btn-submit" class="btn-primary">
+                            <span>Analyze Workload</span>
+                            <i class="fa-solid fa-bolt"></i>
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Loading Spinner (shown during api calls) -->
+            <div id="loader" class="loader-overlay hidden">
+                <div class="loader-container">
+                    <div class="neon-ring"></div>
+                    <div class="loading-text">Analyzing Workload & Running Simulations...</div>
+                </div>
+            </div>
+
+            <!-- Dashboard Results (Hidden by default, shown after first submission) -->
+            <div id="results-panel" class="results-container hidden">
+                
+                <!-- Metadata & Core Recommendations Banner -->
+                <div class="results-summary glass-card">
+                    <div class="summary-details">
+                        <span class="badge" id="detected-type-badge">Batch Processing</span>
+                        <span class="confidence-container">
+                            Confidence Score: <strong id="confidence-val" class="neon-text-purple">92%</strong>
+                        </span>
+                    </div>
+                    <div class="summary-title">
+                        <h2>Workload Diagnostics & Recommendations</h2>
+                    </div>
+                </div>
+
+                <!-- Recommendation Cards Section -->
+                <div class="recommendations-grid">
+                    
+                    <!-- Card A: Time Optimized -->
+                    <div class="glass-card recommendation-card time-opt">
+                        <div class="card-badge time-badge"><i class="fa-solid fa-clock"></i> Time Optimized</div>
+                        <div class="card-header">
+                            <h3 id="time-opt-algo">Shortest Job First (SJF)</h3>
+                        </div>
+                        <div class="recommendation-metric">
+                            Avg Waiting Time: <span id="time-opt-metric" class="neon-text-blue">1.25s</span>
+                        </div>
+                        <p class="recommendation-explanation" id="time-opt-desc">
+                            Selects the algorithm that minimizes average waiting time across all generated processes.
+                        </p>
+                    </div>
+
+                    <!-- Card B: Resource Optimized -->
+                    <div class="glass-card recommendation-card resource-opt">
+                        <div class="card-badge resource-badge"><i class="fa-solid fa-gears"></i> Resource Optimized</div>
+                        <div class="card-header">
+                            <h3 id="res-opt-algo">Priority Scheduling</h3>
+                        </div>
+                        <div class="recommendation-metric">
+                            Context Fit: <span class="neon-text-purple">High Match</span>
+                        </div>
+                        <p class="recommendation-explanation" id="res-opt-desc">
+                            Selects the algorithm based on semantic match, workload priority flags, and execution criteria.
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- Split Grid: Generated Processes & Chart Comparison -->
+                <div class="split-grid">
+                    
+                    <!-- Processes Table -->
+                    <div class="glass-card processes-card">
+                        <div class="card-header">
+                            <i class="fa-solid fa-list-check neon-text-blue"></i>
+                            <h2>Generated Processes</h2>
+                        </div>
+                        <p class="card-desc">Workload-aware synthetic processes generated for simulation (Seed based on text input).</p>
+                        <div class="table-wrapper">
+                            <table id="processes-table">
+                                <thead>
+                                    <tr>
+                                        <th>Process ID</th>
+                                        <th>Arrival Time (AT)</th>
+                                        <th>Burst Time (BT)</th>
+                                        <th>Priority</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Chart Comparison Card -->
+                    <div class="glass-card chart-card">
+                        <div class="card-header">
+                            <i class="fa-solid fa-chart-column neon-text-purple"></i>
+                            <h2>Performance Metrics</h2>
+                        </div>
+                        <p class="card-desc">Comparison of waiting, turnaround, and response times across algorithms.</p>
+                        <div class="chart-wrapper">
+                            <canvas id="comparison-chart"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Gantt Charts Visualization Section -->
+                <div class="glass-card gantt-card">
+                    <div class="card-header">
+                        <i class="fa-solid fa-timeline neon-text-blue"></i>
+                        <h2>Gantt Chart Visualizations</h2>
+                    </div>
+                    <p class="card-desc">Step-by-step CPU execution timelines for each simulated algorithm.</p>
+                    
+                    <div class="gantt-sections">
+                        <!-- FCFS Gantt -->
+                        <div class="gantt-block-container">
+                            <h4 class="gantt-title">First-Come, First-Served (FCFS)</h4>
+                            <div class="gantt-timeline-wrapper">
+                                <div class="gantt-timeline" id="gantt-fcfs">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                                <div class="gantt-scale" id="scale-fcfs">
+                                    <!-- Scale ticks dynamically -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SJF Gantt -->
+                        <div class="gantt-block-container">
+                            <h4 class="gantt-title">Shortest Job First (SJF)</h4>
+                            <div class="gantt-timeline-wrapper">
+                                <div class="gantt-timeline" id="gantt-sjf">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                                <div class="gantt-scale" id="scale-sjf">
+                                    <!-- Scale ticks dynamically -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Priority Gantt -->
+                        <div class="gantt-block-container">
+                            <h4 class="gantt-title">Priority Scheduling</h4>
+                            <div class="gantt-timeline-wrapper">
+                                <div class="gantt-timeline" id="gantt-priority">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                                <div class="gantt-scale" id="scale-priority">
+                                    <!-- Scale ticks dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabbed Detailed Results Tables -->
+                <div class="glass-card details-card">
+                    <div class="card-header">
+                        <i class="fa-solid fa-table-list neon-text-purple"></i>
+                        <h2>Simulation Metrics Details</h2>
+                    </div>
+                    <p class="card-desc">Detailed computational results for each scheduling algorithm.</p>
+
+                    <!-- Tabs Navigation -->
+                    <div class="tabs-nav">
+                        <button class="tab-btn active" data-tab="tab-fcfs">FCFS Results</button>
+                        <button class="tab-btn" data-tab="tab-sjf">SJF Results</button>
+                        <button class="tab-btn" data-tab="tab-priority">Priority Results</button>
+                    </div>
+
+                    <!-- Tab Content Panes -->
+                    <div class="tabs-content">
+                        <!-- FCFS Pane -->
+                        <div class="tab-pane active" id="tab-fcfs">
+                            <div class="table-wrapper">
+                                <table id="fcfs-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Process ID</th>
+                                            <th>Arrival Time</th>
+                                            <th>Burst Time</th>
+                                            <th>Priority</th>
+                                            <th>Start Time</th>
+                                            <th>Completion Time (CT)</th>
+                                            <th>Turnaround Time (TAT)</th>
+                                            <th>Waiting Time (WT)</th>
+                                            <th>Response Time (RT)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Dynamic rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tab-summary-box">
+                                <span>Avg Waiting: <strong id="fcfs-avg-wt">0s</strong></span> | 
+                                <span>Avg Turnaround: <strong id="fcfs-avg-tat">0s</strong></span> | 
+                                <span>Avg Response: <strong id="fcfs-avg-rt">0s</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- SJF Pane -->
+                        <div class="tab-pane" id="tab-sjf">
+                            <div class="table-wrapper">
+                                <table id="sjf-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Process ID</th>
+                                            <th>Arrival Time</th>
+                                            <th>Burst Time</th>
+                                            <th>Priority</th>
+                                            <th>Start Time</th>
+                                            <th>Completion Time (CT)</th>
+                                            <th>Turnaround Time (TAT)</th>
+                                            <th>Waiting Time (WT)</th>
+                                            <th>Response Time (RT)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Dynamic rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tab-summary-box">
+                                <span>Avg Waiting: <strong id="sjf-avg-wt">0s</strong></span> | 
+                                <span>Avg Turnaround: <strong id="sjf-avg-tat">0s</strong></span> | 
+                                <span>Avg Response: <strong id="sjf-avg-rt">0s</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Priority Pane -->
+                        <div class="tab-pane" id="tab-priority">
+                            <div class="table-wrapper">
+                                <table id="priority-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Process ID</th>
+                                            <th>Arrival Time</th>
+                                            <th>Burst Time</th>
+                                            <th>Priority</th>
+                                            <th>Start Time</th>
+                                            <th>Completion Time (CT)</th>
+                                            <th>Turnaround Time (TAT)</th>
+                                            <th>Waiting Time (WT)</th>
+                                            <th>Response Time (RT)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Dynamic rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tab-summary-box">
+                                <span>Avg Waiting: <strong id="priority-avg-wt">0s</strong></span> | 
+                                <span>Avg Turnaround: <strong id="priority-avg-tat">0s</strong></span> | 
+                                <span>Avg Response: <strong id="priority-avg-rt">0s</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Process Scheduling Decision Engine © 2026. Designed with futuristic glassmorphism.</p>
+        </footer>
+    </div>
+
+    <!-- Script File -->
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
